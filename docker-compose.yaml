@@ -1,0 +1,37 @@
+version: "2.4"
+services:
+  mysql:
+    image: "mysql:8.0.21"
+    ports:
+      - "3306:3306"
+    command: --sort_buffer_size=512K
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+      MYSQL_DATABASE: "atomic"
+    volumes:
+      - "mysql:/var/lib/mysql"
+  atomic:
+    image: "libatomic/atomic:latest"
+    ports:
+      - "9000:9000"
+    depends_on:
+      - "mysql"
+    restart: always
+    environment:
+      AUDIENCE: "stratechery-dev.atomicpublishing.com"
+      SESSION_KEY: "atomic"
+      LOG_LEVEL: "debug"
+      SERVER_ADDR: "0.0.0.0:9000"
+      DB_SOURCE: "root:password@tcp(mysql:3306)/atomic?parseTime=true"
+      CORS_ALLOWED_ORIGIN: "*"
+      CHROME_HEADLESS: "local"
+      HTTP_TRACE_ENABLE: "true"
+    volumes:
+      - "assets:/app/assets"
+
+volumes:
+  mysql:
+    driver: "local"
+  assets:
+    driver: "local"
